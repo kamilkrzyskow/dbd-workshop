@@ -1,6 +1,13 @@
 import random
-from db_utils import create_populate_table, database_connection, get_random_name
+import sqlite3
 from enum import Enum
+
+from db_utils import (
+    create_populate_table,
+    database_connection,
+    get_random_name,
+)
+
 
 class Candy(Enum):
     PEANUT_BARS = "Peanut Bars"
@@ -25,7 +32,7 @@ def create_tables(connection: sqlite3.Connection) -> None:
     neighborhood_info, victim_household = generate_neighborhood(connection)
     generate_trick_or_treaters(connection, neighborhood_info, victim_household)
 
-def generate_neighborhood(connection: sqlite3.Connection) -> Tuple[dict, str]:
+def generate_neighborhood(connection: sqlite3.Connection) -> tuple[dict, str]:
     """
     Creates the neighborhood table.
     Returns a tuple of...
@@ -72,7 +79,7 @@ def generate_neighborhood(connection: sqlite3.Connection) -> Tuple[dict, str]:
             # The amount of candy types the current household is giving
             household_candies = random.randint(1, 3)
             for _ in range(household_candies):
-                # Create candy limits for each household 
+                # Create candy limits for each household
                 candy_options = subtract_list(candies, candies_offered)
                 chosen_candy = random.choice(candy_options)
                 candies_offered.append(chosen_candy)

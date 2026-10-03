@@ -3,9 +3,10 @@ Utility functions for basic SQL commands.
 """
 import random
 import sqlite3
-from pathlib import Path
-from typing import Iterable, Mapping, Sequence, Tuple
+from collections.abc import Iterable, Mapping, Sequence
 from functools import cache, wraps
+from pathlib import Path
+
 
 @cache
 def _read_name_list(filename: str) -> list[str]:
@@ -22,7 +23,7 @@ def _to_name_case(name: str) -> str:
     formatted_name = name.strip()
     return formatted_name[0].upper() + formatted_name[1:].lower()
 
-def get_random_name() -> Tuple[str, str]:
+def get_random_name() -> tuple[str, str]:
     "Gets a random name from the text files in the Names directory."
     male_first_names = _read_name_list("male-first-names.txt")
     female_first_names = _read_name_list("female-first-names.txt")
@@ -76,7 +77,7 @@ def _populate_table(
     connection.commit()
 
 __all__ = [
-    "get_random_name",
+    "create_populate_table",
     "database_connection",
-    "create_populate_table"
+    "get_random_name"
 ]
