@@ -23,3 +23,7 @@ venv.bak/
 
 # Our db file
 Scripts/halloween
+
+# Script build artifacts
+Scripts/config.json
+Scripts/db_dump.txt
