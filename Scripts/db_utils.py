@@ -14,7 +14,7 @@ __all__ = [
     "get_random_name",
 ]
 
-R = TypeVar("R") # Generic type for functions which and return the same Any type
+R = TypeVar("R") # Generic type representing Table Row
 
 @dataclass(frozen=True)
 class Column:

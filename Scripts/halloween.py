@@ -83,14 +83,14 @@ def generate_trick_or_treaters(connection: sqlite3.Connection, neighborhood: Nei
     """
 
     # Adding culprit
-    add_visited_household(CASE_CULPRIT, neighborhood, CANDIES_TAKEN.rows, TRICK_OR_TREATERS.rows)
+    add_visited_household(CASE_CULPRIT, neighborhood)
     culprit_candy = subtract_list(neighborhood[victim_household], HEALTHY_FOODS)[0] # There should only be one element left
-    add_victim_visit(victim_household, culprit_candy, CANDIES_TAKEN.rows, TRICK_OR_TREATERS.rows)
+    add_victim_visit(victim_household, culprit_candy)
 
     for _ in range(TRICK_OR_TREATER_COUNT):
         # Create trick-or-treaters
         first_name, last_name = db_utils.get_random_name()
-        add_visited_household(f"{first_name} {last_name}", neighborhood, CANDIES_TAKEN.rows, TRICK_OR_TREATERS.rows)
+        add_visited_household(f"{first_name} {last_name}", neighborhood)
 
     # Sort by name so that the culprit doesn't appear first
     TRICK_OR_TREATERS.rows.sort(key=lambda row: row.name)
@@ -100,7 +100,7 @@ def generate_trick_or_treaters(connection: sqlite3.Connection, neighborhood: Nei
     db_utils.create_populate_table(connection, TRICK_OR_TREATERS)
     db_utils.create_populate_table(connection, CANDIES_TAKEN)
 
-def add_visited_household(name: str, neighborhood: NeighborhoodInfo, candies_taken_rows: list[CandiesTakenRow], trick_or_treaters_rows: list[TrickOrTreatersRow]) -> None:
+def add_visited_household(name: str, neighborhood: NeighborhoodInfo) -> None:
     households_visited = random.sample(list(neighborhood.keys()), random.randint(20, 60))
     for household in households_visited:
         # Add the household each trick-or-treater visited to their table.
@@ -111,16 +111,16 @@ def add_visited_household(name: str, neighborhood: NeighborhoodInfo, candies_tak
                 continue
 
             has_taken = True
-            candies_taken_rows.append(CandiesTakenRow(name=name, candy_taken=candy_taken.value))
+            CANDIES_TAKEN.insert(CandiesTakenRow(name=name, candy_taken=candy_taken.value))
 
         if has_taken:
-            trick_or_treaters_rows.append(TrickOrTreatersRow(name=name, household_visited=household))
+            TRICK_OR_TREATERS.insert(TrickOrTreatersRow(name=name, household_visited=household))
 
-def add_victim_visit(victim_household: str, victim_candy: Candy, candies_taken_rows: list[CandiesTakenRow], trick_or_treaters_rows: list[TrickOrTreatersRow]) -> None:
+def add_victim_visit(victim_household: str, victim_candy: Candy) -> None:
     print(f"Suspect went to {victim_household} and took an extra {victim_candy}")
-    trick_or_treaters_rows.append(TrickOrTreatersRow(name=CASE_CULPRIT, household_visited=victim_household))
+    TRICK_OR_TREATERS.insert(TrickOrTreatersRow(name=CASE_CULPRIT, household_visited=victim_household))
     for _ in range(2):
-        candies_taken_rows.append(CandiesTakenRow(name=CASE_CULPRIT, candy_taken=victim_candy.value))
+        CANDIES_TAKEN.insert(CandiesTakenRow(name=CASE_CULPRIT, candy_taken=victim_candy.value))
 
 def skip_if_healthy(item: Candy) -> bool:
     # Most trick-or-treaters will skip healthy items
