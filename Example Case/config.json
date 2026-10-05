@@ -6,6 +6,7 @@
     "database": "halloween",
 	"lockedTables": ["neighborhood", "trick_or_treaters", "candies_taken"],
     "evidenceFiles": ["crime scene.jpg"],
+    "evidenceAudioFiles": ["message from grandma.mp3"],
     "previewImage": "police report 1x1.png",
     "culpritName": "Candy Georgino",
     "culpritArrestImage": "culprit.jpg",

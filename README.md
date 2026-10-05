@@ -16,6 +16,7 @@ In order to file a report, you'll need to create a `json` file in a separate fol
     "database": "Database Name Here", // Required
 	"lockedTables": ["table1", "table2", "etc"], // Optional (Recommended)
     "evidenceFiles": ["evidence.jpg"], // Required
+    "evidenceAudioFiles": ["evidence.mp3"], // Optional
     "previewImage": "police report 1x1.png", // Optional (Recommended)
     "culpritName": "Culprit Name Here", // Required
     "culpritArrestImage": "culprit.jpg", // Optional
