@@ -95,7 +95,7 @@ CASE_LOCKED_TABLES: tuple[str, ...] = tuple(obj.name
 # Define helper objects specific to your case
 ###
 
-# TODO Python 3.10 does not support StrEnum which is better as it avoids candy.value
+# When using Python version >3.10 StrEnum is better as it doesn't require .value
 class Candy(Enum):
     PEANUT_BARS = "Peanut Bars"
     SWEETUMS = "Sweetums"

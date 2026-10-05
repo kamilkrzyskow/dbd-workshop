@@ -4,6 +4,7 @@ Utility functions for basic SQL commands.
 import random
 import sqlite3
 from dataclasses import dataclass
+from enum import Enum
 from functools import cache
 from pathlib import Path
 from typing import Generic, NamedTuple, TypeVar
@@ -19,6 +20,15 @@ R = TypeVar("R") # Generic type representing Table Row
 CONNECTION: sqlite3.Connection | None = None
 """Initialized inside halloween.py"""
 
+# Let's limit the DB to these types to not test the parser too much
+PY_TO_DB_MAP: dict[type, str] = {
+    str: "TEXT",
+    int: "INTEGER",
+    float: "REAL",
+    bool: "BOOLEAN",
+    type(None): "NULL",
+}
+
 @dataclass(frozen=True)
 class Column:
     name: str
@@ -31,13 +41,10 @@ class Table(Generic[R]):
         self.schema: type[NamedTuple] = schema
         self._rows: list[R] = []
 
-        if bool in tuple(self.schema.__annotations__.values()):
-            print("WARNING: bool found")
-
     @property
     def columns(self):
         return tuple(
-            Column(name=name, db_type=self.py_to_db(py_type)) # pyright: ignore[reportAny]
+            Column(name=name, db_type=self._py_to_db(py_type)) # pyright: ignore[reportAny]
             for name, py_type in   # pyright: ignore[reportAny]
             self.schema.__annotations__.items()
         )
@@ -49,18 +56,8 @@ class Table(Generic[R]):
     def insert(self, row: R) -> None:
         self._rows.append(row)
 
-    def py_to_db(self, py_type: type) -> str:
-        # TODO Other than str->"TEXT", the mappings were not tested
-        # TODO The mapping might be custom depending on the needs of the developer / differ by table
-        type_map: dict[type, str] = {
-            str: "TEXT",
-            int: "INTEGER",
-            float: "REAL",
-            bool: "BOOLEAN",
-            type(None): "NULL",
-        }
-
-        return type_map[py_type]
+    def _py_to_db(self, py_type: type) -> str:
+        return PY_TO_DB_MAP[py_type]
 
 def get_random_name() -> tuple[str, str]:
     """
@@ -119,7 +116,19 @@ def _populate_table(
     placeholders = ", ".join("?" for _ in columns)
     query = f"INSERT INTO {table.name} ({sql_columns}) VALUES ({placeholders})"
 
-    values = tuple(tuple(getattr(row, column) for column in columns) for row in table.rows)
+    values = tuple(tuple(map(_convert_value, (getattr(row, column) for column in columns))) for row in table.rows)
     cursor = connection.executemany(query, values)
     connection.commit()
     cursor.close()
+
+def _convert_value(value: str | bool | None | float):
+    """
+    Helper function for DB value assignment
+    """
+    if isinstance(value, bool):
+        return int(value)
+
+    if isinstance(value, Enum):
+        return value.value  # pyright: ignore[reportAny]
+
+    return value
