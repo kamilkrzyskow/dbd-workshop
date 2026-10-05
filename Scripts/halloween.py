@@ -34,7 +34,6 @@ def generate_neighborhood(connection: sqlite3.Connection) -> tuple[NeighborhoodI
         victim_household: the name/household of the victim
     """
     neighborhood_info: NeighborhoodInfo = {}
-    neighborhood_rows: list[NeighborhoodRow] = []
     candies = list(Candy)
     victim_household: str = "" # Empty for not condition
     for i in range(HOUSEHOLD_COUNT):
@@ -70,11 +69,11 @@ def generate_neighborhood(connection: sqlite3.Connection) -> tuple[NeighborhoodI
                 chosen_candy = random.choice(candy_options)
                 candies_offered.append(chosen_candy)
         for candy in candies_offered:
-            neighborhood_rows.append(NeighborhoodRow(household=household, candy_offered=candy.value))
+            NEIGHBORHOOD.insert(NeighborhoodRow(household=household, candy_offered=candy.value))
         neighborhood_info[household] = candies_offered
 
-    neighborhood_rows.sort(key=lambda row: row.household)
-    db_utils.create_populate_table(connection, NEIGHBORHOOD, neighborhood_rows)
+    NEIGHBORHOOD.rows.sort(key=lambda row: row.household)
+    db_utils.create_populate_table(connection, NEIGHBORHOOD)
 
     return neighborhood_info, victim_household
 
@@ -82,26 +81,24 @@ def generate_trick_or_treaters(connection: sqlite3.Connection, neighborhood: Nei
     """
     Creates the tables related to trick-or-treaters (trick_or_treaters and candies_taken)
     """
-    trick_or_treaters_rows: list[TrickOrTreatersRow] = []
-    candies_taken_rows: list[CandiesTakenRow] = []
 
     # Adding culprit
-    add_visited_household(CASE_CULPRIT, neighborhood, candies_taken_rows, trick_or_treaters_rows)
+    add_visited_household(CASE_CULPRIT, neighborhood, CANDIES_TAKEN.rows, TRICK_OR_TREATERS.rows)
     culprit_candy = subtract_list(neighborhood[victim_household], HEALTHY_FOODS)[0] # There should only be one element left
-    add_victim_visit(victim_household, culprit_candy, candies_taken_rows, trick_or_treaters_rows)
+    add_victim_visit(victim_household, culprit_candy, CANDIES_TAKEN.rows, TRICK_OR_TREATERS.rows)
 
     for _ in range(TRICK_OR_TREATER_COUNT):
         # Create trick-or-treaters
         first_name, last_name = db_utils.get_random_name()
-        add_visited_household(f"{first_name} {last_name}", neighborhood, candies_taken_rows, trick_or_treaters_rows)
+        add_visited_household(f"{first_name} {last_name}", neighborhood, CANDIES_TAKEN.rows, TRICK_OR_TREATERS.rows)
 
     # Sort by name so that the culprit doesn't appear first
-    trick_or_treaters_rows.sort(key=lambda row: row.name)
-    candies_taken_rows.sort(key=lambda row: row.name)
+    TRICK_OR_TREATERS.rows.sort(key=lambda row: row.name)
+    CANDIES_TAKEN.rows.sort(key=lambda row: row.name)
 
     # Add the trick-or-treater tables to the database
-    db_utils.create_populate_table(connection, TRICK_OR_TREATERS, trick_or_treaters_rows)
-    db_utils.create_populate_table(connection, CANDIES_TAKEN, candies_taken_rows)
+    db_utils.create_populate_table(connection, TRICK_OR_TREATERS)
+    db_utils.create_populate_table(connection, CANDIES_TAKEN)
 
 def add_visited_household(name: str, neighborhood: NeighborhoodInfo, candies_taken_rows: list[CandiesTakenRow], trick_or_treaters_rows: list[TrickOrTreatersRow]) -> None:
     households_visited = random.sample(list(neighborhood.keys()), random.randint(20, 60))

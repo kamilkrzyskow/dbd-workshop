@@ -61,7 +61,7 @@ class NeighborhoodRow(NamedTuple):
     household: str
     candy_offered: str
 
-NEIGHBORHOOD = db_utils.Table(
+NEIGHBORHOOD = db_utils.Table[NeighborhoodRow](
     name="neighborhood",
     schema=NeighborhoodRow
 )
@@ -70,7 +70,7 @@ class TrickOrTreatersRow(NamedTuple):
     name: str
     household_visited: str
 
-TRICK_OR_TREATERS = db_utils.Table(
+TRICK_OR_TREATERS = db_utils.Table[TrickOrTreatersRow](
     name="trick_or_treaters",
     schema=TrickOrTreatersRow
 )
@@ -79,7 +79,7 @@ class CandiesTakenRow(NamedTuple):
     name: str
     candy_taken: str
 
-CANDIES_TAKEN = db_utils.Table(
+CANDIES_TAKEN = db_utils.Table[CandiesTakenRow](
     name="candies_taken",
     schema=CandiesTakenRow
 )

@@ -3,11 +3,10 @@ Utility functions for basic SQL commands.
 """
 import random
 import sqlite3
-from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import NamedTuple
+from typing import Generic, NamedTuple, TypeVar
 
 __all__ = [
     "Table",
@@ -15,15 +14,22 @@ __all__ = [
     "get_random_name",
 ]
 
+R = TypeVar("R") # Generic type for functions which and return the same Any type
+
 @dataclass(frozen=True)
 class Column:
     name: str
     db_type: str
 
-@dataclass(frozen=True)
-class Table:
-    name: str
-    schema: type[NamedTuple]
+class Table(Generic[R]):
+    def __init__(self, name: str, schema: type[NamedTuple]) -> None:
+        super().__init__()
+        self.name: str = name
+        self.schema: type[NamedTuple] = schema
+        self._rows: list[R] = []
+
+        if bool in tuple(self.schema.__annotations__.values()):
+            print("WARNING: bool found")
 
     @property
     def columns(self):
@@ -32,6 +38,13 @@ class Table:
             for name, py_type in   # pyright: ignore[reportAny]
             self.schema.__annotations__.items()
         )
+
+    @property
+    def rows(self) -> list[R]:
+        return self._rows
+
+    def insert(self, row: R) -> None:
+        self._rows.append(row)
 
     def py_to_db(self, py_type: type) -> str:
         # TODO Other than str->"TEXT", the mappings were not tested
@@ -70,16 +83,15 @@ def _read_name_list(filename: str) -> list[str]:
 
 def create_populate_table(
     connection: sqlite3.Connection,
-    table: Table,
-    rows: Iterable[NamedTuple]
+    table: Table[R]
 ) -> None:
     """
     Creates and populates a table with the given rows.
     """
     _create_table(connection, table)
-    _populate_table(connection, table, rows)
+    _populate_table(connection, table)
 
-def _create_table(connection: sqlite3.Connection, table: Table) -> None:
+def _create_table(connection: sqlite3.Connection, table: Table[R]) -> None:
     """
     Creates a table.
     """
@@ -93,8 +105,7 @@ def _create_table(connection: sqlite3.Connection, table: Table) -> None:
 
 def _populate_table(
     connection: sqlite3.Connection,
-    table: Table,
-    rows: Iterable[NamedTuple],
+    table: Table[R]
 ) -> None:
     """
     Populates a table with the given rows.
@@ -104,7 +115,7 @@ def _populate_table(
     placeholders = ", ".join("?" for _ in columns)
     query = f"INSERT INTO {table.name} ({sql_columns}) VALUES ({placeholders})"
 
-    values = tuple(tuple(getattr(row, column) for column in columns) for row in rows)
+    values = tuple(tuple(getattr(row, column) for column in columns) for row in table.rows)
     cursor = connection.executemany(query, values)
     connection.commit()
     cursor.close()
