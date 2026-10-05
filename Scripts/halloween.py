@@ -16,8 +16,11 @@ def main() -> None:
     # random.seed(0) # For static random tests
 
     with sqlite3.connect(CASE_DB_NAME) as connection:
-        neighborhood_info, victim_household = generate_neighborhood(connection)
-        generate_trick_or_treaters(connection, neighborhood_info, victim_household)
+
+        db_utils.CONNECTION = connection
+
+        neighborhood_info, victim_household = generate_neighborhood()
+        generate_trick_or_treaters(neighborhood_info, victim_household)
 
         # # For static random tests
         # with open("db_dump.txt", "w", encoding="utf-8") as db_dump:
@@ -26,7 +29,7 @@ def main() -> None:
     if input("Generate config.json? Yes or No [n]: ").lower().strip().startswith("y"):
         generate_config.main()
 
-def generate_neighborhood(connection: sqlite3.Connection) -> tuple[NeighborhoodInfo, str]:
+def generate_neighborhood() -> tuple[NeighborhoodInfo, str]:
     """
     Creates the neighborhood table.
     Returns a tuple of...
@@ -73,11 +76,11 @@ def generate_neighborhood(connection: sqlite3.Connection) -> tuple[NeighborhoodI
         neighborhood_info[household] = candies_offered
 
     NEIGHBORHOOD.rows.sort(key=lambda row: row.household)
-    db_utils.create_populate_table(connection, NEIGHBORHOOD)
+    db_utils.create_populate_table(NEIGHBORHOOD)
 
     return neighborhood_info, victim_household
 
-def generate_trick_or_treaters(connection: sqlite3.Connection, neighborhood: NeighborhoodInfo, victim_household: str) -> None:
+def generate_trick_or_treaters(neighborhood: NeighborhoodInfo, victim_household: str) -> None:
     """
     Creates the tables related to trick-or-treaters (trick_or_treaters and candies_taken)
     """
@@ -97,8 +100,8 @@ def generate_trick_or_treaters(connection: sqlite3.Connection, neighborhood: Nei
     CANDIES_TAKEN.rows.sort(key=lambda row: row.name)
 
     # Add the trick-or-treater tables to the database
-    db_utils.create_populate_table(connection, TRICK_OR_TREATERS)
-    db_utils.create_populate_table(connection, CANDIES_TAKEN)
+    db_utils.create_populate_table(TRICK_OR_TREATERS)
+    db_utils.create_populate_table(CANDIES_TAKEN)
 
 def add_visited_household(name: str, neighborhood: NeighborhoodInfo) -> None:
     households_visited = random.sample(list(neighborhood.keys()), random.randint(20, 60))

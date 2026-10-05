@@ -16,6 +16,9 @@ __all__ = [
 
 R = TypeVar("R") # Generic type representing Table Row
 
+CONNECTION: sqlite3.Connection | None = None
+"""Initialized inside halloween.py"""
+
 @dataclass(frozen=True)
 class Column:
     name: str
@@ -81,15 +84,16 @@ def _read_name_list(filename: str) -> list[str]:
     with path.open("r", encoding="utf-8") as file:
         return [line.strip() for line in file if line.strip()]
 
-def create_populate_table(
-    connection: sqlite3.Connection,
-    table: Table[R]
-) -> None:
+def create_populate_table(table: Table[R]) -> None:
     """
     Creates and populates a table with the given rows.
     """
-    _create_table(connection, table)
-    _populate_table(connection, table)
+
+    if CONNECTION is None:
+        raise sqlite3.ProgrammingError("Connection was not initialized")
+
+    _create_table(CONNECTION, table)
+    _populate_table(CONNECTION, table)
 
 def _create_table(connection: sqlite3.Connection, table: Table[R]) -> None:
     """
