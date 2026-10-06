@@ -27,3 +27,4 @@ Scripts/halloween
 # Script build artifacts
 Scripts/config.json
 Scripts/db_dump.txt
+Scripts/case_db*

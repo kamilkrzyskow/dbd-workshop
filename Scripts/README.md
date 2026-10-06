@@ -21,6 +21,21 @@ The data is created in the main [`halloween.py`](halloween.py) file. The neighbo
 The database is saved to disk with general ready to use functions inside [`db_utils.py`](db_utils.py).
 The `config.json` file is created inside [`generate_config.py`](generate_config.py).
 
+### Alternative minimal case
+
+You can try to implement this simple case as another starting point or practice.
+
+<details open>
+    <summary>Beer Party Incident</summary>
+
+    Hello, Detective. I’m Karen Cox from MW Media Group, and I need your help with a matter of **considerable corporate gravity**. Our CEO threw a party for all employees after we hit some mysterious income quota, with one irresistible incentive: **free beer**. The beer was carefully tracked to prevent abuse, but far too many employees showed up, and the evening quickly descended into **unmitigated pandemonium**. Nobody was hurt and nothing was damaged, but the situation was becoming increasingly unruly.
+    
+    Company policy states that, in such circumstances, the **oldest and most capable problem-solver present** must restore order. Yet nobody stepped forward. Detective, find the person responsible for this **egregious dereliction of duty**, which allowed this utterly **calamitous beer-fuelled debacle** to continue.
+  
+</details>
+
+If you need more reference this case is implemented in the [`minimal.py`](minimal.py) file.
+
 ## Python installation
 
 At the time of writing the guide, the [`uv`](https://docs.astral.sh/uv/) project is slowly becoming the industry standard for managing Python installations. You can read up on the [installation guide](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) there.

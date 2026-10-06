@@ -26,7 +26,6 @@ PY_TO_DB_MAP: dict[type, str] = {
     int: "INTEGER",
     float: "REAL",
     bool: "BOOLEAN",
-    type(None): "NULL",
 }
 
 @dataclass(frozen=True)
@@ -53,10 +52,13 @@ class Table(Generic[R]):
     def rows(self) -> list[R]:
         return self._rows
 
-    def insert(self, row: R) -> None:
-        self._rows.append(row)
+    def insert(self, *rows: R) -> None:
+        self._rows.extend(rows)
 
     def _py_to_db(self, py_type: type) -> str:
+        for key, value in PY_TO_DB_MAP.items():
+            if key.__name__ in str(py_type): # "str" in "str | None"
+                return value
         return PY_TO_DB_MAP[py_type]
 
 def get_random_name() -> tuple[str, str]:
@@ -127,6 +129,9 @@ def _convert_value(value: str | bool | None | float):
     """
     if isinstance(value, bool):
         return int(value)
+
+    if isinstance(value, str) and value == "":
+        return None
 
     if isinstance(value, Enum):
         return value.value  # pyright: ignore[reportAny]
