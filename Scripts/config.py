@@ -29,6 +29,8 @@ CASE_DIFFICULTY = "Medium"
 """Easy, Medium, Hard used as Tag in Steam Workshop"""
 CASE_CONCEPTS = ["GROUP BY"]
 """List of concepts like JOIN, GROUP BY, HAVING et.c, displayed both in-game and used as Tags in Workshop Steam"""
+CASE_AUDIO_EVIDENCE = ["message from grandma.mp3"]
+"""List of audio evidence files"""
 CASE_PREVIEW_IMAGE = "police report 1x1.png"
 """Name of image file shown as Preview in Steam Workshop"""
 CASE_CULPRIT_ARREST_IMAGE = "culprit.jpg"

@@ -15,6 +15,7 @@ def main() -> None:
         "author": CASE_AUTHOR,
         "difficulty": CASE_DIFFICULTY,
         "lockedTables": CASE_LOCKED_TABLES,
+        "evidenceAudioFiles": CASE_AUDIO_EVIDENCE,
         "previewImage": CASE_PREVIEW_IMAGE,
         "culpritArrestImage": CASE_CULPRIT_ARREST_IMAGE,
         "arrestWarrant": CASE_ARREST_WARRANT,
@@ -46,7 +47,7 @@ def main() -> None:
 
     print(f"Writing to file {config_path.name}")
     with config_path.open("w", encoding="utf-8") as file:
-        json.dump(config, file, indent=2)
+        json.dump(config, file, indent=2, sort_keys=True)
 
 
 if __name__ == "__main__":
